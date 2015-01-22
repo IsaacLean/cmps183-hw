@@ -2,9 +2,9 @@
 
 db.define_table('forsalesite',
                 Field('name'),
-                Field('date', 'datetime'),
+                Field('date_posted', 'datetime'),
                 Field('title'),
-                Field('content'),
+                Field('body'),
                 Field('image'),
                 Field('category'),
                 Field('price'),

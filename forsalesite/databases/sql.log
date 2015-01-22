@@ -53,3 +53,16 @@ CREATE TABLE auth_cas(
     renew CHAR(1)
 );
 success!
+timestamp: 2015-01-22T04:03:54.137000
+CREATE TABLE forsalesite(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name CHAR(512),
+    date_posted TIMESTAMP,
+    title CHAR(512),
+    body CHAR(512),
+    image CHAR(512),
+    category CHAR(512),
+    price CHAR(512),
+    available CHAR(512)
+);
+success!

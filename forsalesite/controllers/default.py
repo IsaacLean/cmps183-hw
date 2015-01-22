@@ -17,8 +17,8 @@ def index():
     if you need a simple wiki simply replace the two lines below with:
     return auth.wiki()
     """
-    response.flash = T("Welcome to web2py!")
-    return dict(message=T('Hello World'))
+    posts = db().select(db.forsalesite.ALL)
+    return dict(posts=posts)
 
 
 def user():
@@ -58,7 +58,7 @@ def call():
     return service()
 
 
-@auth.requires_login() 
+@auth.requires_login()
 def api():
     """
     this is example of API with access control

@@ -1,2 +1,2 @@
 def index():
-    return "Hello from MyApp"
+    return dict(message="Hello from MyApp")

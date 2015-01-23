@@ -67,3 +67,7 @@ CREATE TABLE forsalesite(
 );
 success!
 success!
+timestamp: 2015-01-22T17:26:10.112000
+ALTER TABLE forsalesite ADD user_id INTEGER REFERENCES auth_user (id) ON DELETE CASCADE;
+success!
+success!

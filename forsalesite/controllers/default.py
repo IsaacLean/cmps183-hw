@@ -20,10 +20,11 @@ def index():
     posts = db().select(db.forsalesite.ALL)
     return dict(posts = posts)
 
+@auth.requires_login()
 def add():
     form = SQLFORM(db.forsalesite)
     if form.process().accepted:
-        session.flash = T('Added')
+        session.flash = T('Listing added')
         redirect(URL('default', 'index'))
     return dict(form = form)
 

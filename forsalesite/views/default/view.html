@@ -5,3 +5,6 @@
     Post
 </h1>
 {{=form}}
+{{if form.record.image != "":}}
+{{=IMG (_src=URL('download',args=form.record.image))}}
+{{pass}}

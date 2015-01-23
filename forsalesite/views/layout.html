@@ -95,10 +95,12 @@
       {{if response.title:}}
         <div class="span12">
             <div class="page-header">
+              <a href="/{{=response.title}}">
                 <h1>
                     {{=response.title}}
                     <small>{{=response.subtitle or ''}}</small>
                 </h1>
+              </a>
             </div>
         </div>
 	{{pass}}

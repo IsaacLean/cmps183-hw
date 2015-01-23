@@ -13,7 +13,7 @@ db.define_table('forsalesite',
                 Field('date_posted', 'datetime'),
                 Field('title'),
                 Field('body', 'text'),
-                Field('image'),
+                Field('image', 'upload'),
                 Field('category'),
                 Field('price'),
                 Field('available')

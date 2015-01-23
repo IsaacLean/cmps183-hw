@@ -66,3 +66,4 @@ CREATE TABLE forsalesite(
     available CHAR(512)
 );
 success!
+success!

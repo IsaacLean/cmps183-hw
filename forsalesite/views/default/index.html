@@ -7,3 +7,15 @@
 <h2>
     Listings
 </h2>
+{{if len(posts) > 0:}}
+<ul>
+    {{for p in posts:}}
+    <li>Listing by {{=p.name}} | Posted on {{=p.date_posted}}</li>
+    {{pass}}
+</ul>
+{{else:}}
+<p>
+    There are no listings.
+</p>
+{{pass}}
+{{=A('Add a post', _class='btn', _href=URL('default', 'add'))}}

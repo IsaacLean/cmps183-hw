@@ -1,8 +1,8 @@
-progress.log
-cache/*
-databases/*
-errors/*
-sessions/*
+forsalesite/progress.log
+forsalesite/cache/*
+forsalesite/databases/*
+forsalesite/errors/*
+forsalesite/sessions/*
 *.pyc
 *.bak
 

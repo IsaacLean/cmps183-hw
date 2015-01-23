@@ -18,8 +18,14 @@ def index():
     return auth.wiki()
     """
     posts = db().select(db.forsalesite.ALL)
-    return dict(posts=posts)
+    return dict(posts = posts)
 
+def add():
+    form = SQLFORM(db.forsalesite)
+    if form.process().accepted:
+        session.flash = T('Added')
+        redirect(URL('default', 'index'))
+    return dict(form = form)
 
 def user():
     """

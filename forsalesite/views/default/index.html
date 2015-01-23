@@ -9,11 +9,19 @@
 </h2>
 {{if len(posts) > 0:}}
 <table class="table table-striped">
+	<tr>
+		<th>Listing by:</th>
+		<th>Listing title:</th>
+		<th>Posted on:</th>
+		<th>Available:</th>
+		<td></td>
+	</tr>
     {{for p in posts:}}
     <tr>
-    	<td>Listing by: {{=p.name}}</td>
-    	<td>Listing title: {{=p.title}}</td>
-    	<td>Posted on: {{=p.date_posted}}</td>
+    	<td>{{=p.name}}</td>
+    	<td>{{=p.title}}</td>
+    	<td>{{=p.date_posted}}</td>
+    	<td>{{=p.available}}</td>
     	<td>{{=A('View', _class='btn', _href=URL('default', 'view', args=[p.id]))}}</td>
     </tr>
     {{pass}}

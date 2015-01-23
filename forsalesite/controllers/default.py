@@ -17,8 +17,13 @@ def index():
     if you need a simple wiki simply replace the two lines below with:
     return auth.wiki()
     """
-    posts = db().select(db.forsalesite.ALL)
-    return dict(posts = posts)
+    """posts = db().select(db.forsalesite.ALL)
+    return dict(posts = posts)"""
+
+    q = db.forsalesite
+    form = SQLFORM.grid(q,
+        fields=[db.forsalesite.name, db.forsalesite.date_posted, db.forsalesite.title, db.forsalesite.category, db.forsalesite.price, db.forsalesite.available])
+    return dict(form = form)
 
 @auth.requires_login()
 def add():

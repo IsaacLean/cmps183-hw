@@ -7,28 +7,5 @@
 <h2>
     Listings
 </h2>
-{{if len(posts) > 0:}}
-<table class="table table-striped">
-	<tr>
-		<th>Listing by:</th>
-		<th>Listing title:</th>
-		<th>Posted on:</th>
-		<th>Available:</th>
-		<td></td>
-	</tr>
-    {{for p in posts:}}
-    <tr>
-    	<td>{{=p.name}}</td>
-    	<td>{{=p.title}}</td>
-    	<td>{{=p.date_posted}}</td>
-    	<td>{{=p.available}}</td>
-    	<td>{{=A('View', _class='btn', _href=URL('default', 'view', args=[p.id]))}}</td>
-    </tr>
-    {{pass}}
-</table>
-{{else:}}
-<p>
-    There are no listings.
-</p>
-{{pass}}
+{{=form}}
 {{=A('Add a post', _class='btn', _href=URL('default', 'add'))}}

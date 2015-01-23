@@ -28,6 +28,12 @@ def add():
         redirect(URL('default', 'index'))
     return dict(form = form)
 
+def view():
+    #p = db(db.forsalesite.id == request.args(0)).select().first()
+    p = db.forsalesite(request.args(0)) or redirect(URL('default', 'index'))
+    form = SQLFORM(db.forsalesite, record = p, readonly = True)
+    return dict(form = form)
+
 def user():
     """
     exposes:

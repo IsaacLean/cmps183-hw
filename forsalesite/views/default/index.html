@@ -8,11 +8,16 @@
     Listings
 </h2>
 {{if len(posts) > 0:}}
-<ul>
+<table class="table table-striped">
     {{for p in posts:}}
-    <li>Listing by {{=p.name}} | Posted on {{=p.date_posted}}</li>
+    <tr>
+    	<td>Listing by: {{=p.name}}</td>
+    	<td>Listing title: {{=p.title}}</td>
+    	<td>Posted on: {{=p.date_posted}}</td>
+    	<td>{{=A('View', _class='btn', _href=URL('default', 'view', args=[p.id]))}}</td>
+    </tr>
     {{pass}}
-</ul>
+</table>
 {{else:}}
 <p>
     There are no listings.

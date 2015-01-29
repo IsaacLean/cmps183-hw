@@ -20,9 +20,9 @@ def index():
     """posts = db().select(db.forsalesite.ALL)
     return dict(posts = posts)"""
 
-    q = db.forsalesite
+    q = (db.forsalesite.available == True)
     form = SQLFORM.grid(q,
-        fields=[db.forsalesite.name, db.forsalesite.date_posted, db.forsalesite.title, db.forsalesite.category, db.forsalesite.price, db.forsalesite.available])
+    fields=[db.forsalesite.name, db.forsalesite.date_posted, db.forsalesite.title, db.forsalesite.category, db.forsalesite.price, db.forsalesite.available])
     return dict(form = form)
 
 @auth.requires_login()
@@ -37,6 +37,12 @@ def view():
     #p = db(db.forsalesite.id == request.args(0)).select().first()
     p = db.forsalesite(request.args(0)) or redirect(URL('default', 'index'))
     form = SQLFORM(db.forsalesite, record = p, readonly = True)
+    return dict(form = form)
+
+def all():
+    q = db.forsalesite
+    form = SQLFORM.grid(q,
+        fields=[db.forsalesite.name, db.forsalesite.date_posted, db.forsalesite.title, db.forsalesite.category, db.forsalesite.price, db.forsalesite.available])
     return dict(form = form)
 
 def user():

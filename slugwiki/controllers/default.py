@@ -42,7 +42,7 @@ def index():
         dict(header = '', body = generate_del_button)
     ]
 
-    form = SQLFORM.grid(q, editable = False, deletable = False, details = False, links=links)
+    form = SQLFORM.grid(q, create = False, editable = False, deletable = False, details = False, links=links, csv = False)
     return dict(display_title=display_title, form=form)
 
 def view():
@@ -61,13 +61,14 @@ def view():
     #create edit button
     btnEdit = A('Edit this page', _class='btn', _href=URL('default', 'edit', args = [request.args(0)]))
 
+    #return data to view.html
     return dict(page_title=page_title, page_body=page_body, page_date=page_date, btnEdit=btnEdit)
 
 @auth.requires_login()
 def add():
     #generate form for user to use
     form = SQLFORM.factory(
-        Field('input_title', 'string', label = 'Page Title'),
+        Field('input_title', 'string', label = 'Page Title', requires = IS_NOT_EMPTY()),
         Field('input_body', 'text', label = 'Content')
         )
     form.add_button('Cancel', URL('default', 'index'))
@@ -102,7 +103,7 @@ def edit():
 
     #generate form for user to use
     form = SQLFORM.factory(
-        Field('input_title', 'string', label = 'Page Title', default = latest_title),
+        Field('input_title', 'string', label = 'Page Title', default = latest_title, requires = IS_NOT_EMPTY()),
         Field('input_body', 'text', label = 'Content', default = latest_body)
         )
     form.add_button('Cancel', URL('default', 'view', args = [request.args(0)]))

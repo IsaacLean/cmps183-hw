@@ -84,6 +84,7 @@ def add():
 
         #insert new revision tied to new page
         db.revision.insert(pageid = page_id, body = request.vars['input_body'])
+        session.flash = T('Page added')
         redirect(URL('default', 'view', args = page_id))
 
     #return data to add.html
@@ -112,6 +113,7 @@ def edit():
     if form.process().accepted:
         q[0].update_record(title = request.vars['input_title'])
         db.revision.insert(pageid = page_id, body = request.vars['input_body'])
+        session.flash = T('Page edited')
         redirect(URL('default', 'view', args = page_id.id))
 
     #return data to edit.html
@@ -125,6 +127,7 @@ def delete():
     form = FORM.confirm('Are you sure you want to delete this page?')
     if form.accepted:
         db(db.pagetable.id == page_id.id).delete()
+        session.flash = T('Page deleted')
         redirect(URL('default', 'index'))
     return dict(form=form)
 

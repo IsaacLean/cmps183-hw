@@ -47,28 +47,23 @@ def index():
     return dict(display_title=display_title, form=form)
 
 def view():
-    p = db.pagetable(request.args(0)) or redirect(URL('default', 'index'))
-    form = SQLFORM(db.pagetable, record = p, readonly = True)
-    return dict(form=form)
+    page_id = db.pagetable(request.args(0)) or redirect(URL('default', 'index'))
+
+    #get page title
+    q = db(db.pagetable.id == page_id).select()
+    page_title = q[0].title
+
+    #get latest revision data
+    q = db(db.revision.pageid == page_id).select().last()
+    page_body = q.body
+    page_date = q.date_created
+
+    return dict(page_title=page_title, page_body=page_body, page_date=page_date)
 
 @auth.requires_login()
 def add():
-    """form = SQLFORM(db.pagetable)
-    if form.process().accepted:
-        session.flash = T('Page added')
-        redirect(URL('default', 'index'))"""
     form = FORM('Page title: ', INPUT(_name='input_title'), 'Body: ', INPUT(_name='input_body'), '', INPUT(_type='submit'))
     if form.process().accepted:
-        #page_id = db.executesql('SELECT max(id) from pagetable')
-        """q = db((db.pagetable).select(db.pagetable.id.max()))
-        print 'the time is now'
-        print q
-        if q == '9':
-            print 'equal'
-        else:
-            print 'not equal'
-        for thing in q:
-            print thing.id"""
         #insert new page with title
         db.pagetable.insert(title = request.vars['input_title'])
 

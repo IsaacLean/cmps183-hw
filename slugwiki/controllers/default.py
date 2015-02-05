@@ -5,7 +5,8 @@ import logging
 
 
 def index():
-    display_title = request.args(0) or 'All Wiki Pages'
+    title = request.args(0) or 'All Wiki Pages'
+    display_title = title.replace('_', ' ')
     form = ''
     btnAdd = ''
     page_body = ''
@@ -26,12 +27,12 @@ def index():
 
             last_modified = 'Last modified: ' + str(q.date_created)
             btnEdit = A('Edit this page', _class='btn', _href=URL('default', 'edit', args = [page_id]))
-            page_body = q.body
+            page_body = represent_wiki(q.body)
     else:
         q = db.pagetable
 
         def generate_view_button(row):
-            b = A('View', _class='btn', _href=URL('default', 'view', args=[row.id]))
+            b = A('View', _class='btn', _href=URL('default', 'index', args=[row.title]))
             return b
 
         def generate_edit_button(row):
@@ -97,7 +98,7 @@ def add():
         #insert new revision tied to new page
         db.revision.insert(pageid = page_id, body = request.vars['input_body'])
         session.flash = T('Page added')
-        redirect(URL('default', 'view', args = page_id))
+        redirect(URL('default', 'index', args = request.vars['input_title']))
 
     #return data to add.html
     return dict(form=form)
@@ -126,7 +127,7 @@ def edit():
         q[0].update_record(title = request.vars['input_title'])
         db.revision.insert(pageid = page_id, body = request.vars['input_body'])
         session.flash = T('Page edited')
-        redirect(URL('default', 'view', args = page_id.id))
+        redirect(URL('default', 'index', args = request.vars['input_title']))
 
     #return data to edit.html
     return dict(form=form, page_title=latest_title)

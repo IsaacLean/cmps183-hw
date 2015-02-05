@@ -66,7 +66,12 @@ def view():
 @auth.requires_login()
 def add():
     #generate form for user to use
-    form = FORM('Page title: ', INPUT(_name='input_title'), 'Body: ', INPUT(_name='input_body'), '', INPUT(_type='submit'))
+    form = SQLFORM.factory(
+        Field('input_title', 'string', label = 'Page Title'),
+        Field('input_body', 'text', label = 'Content')
+        )
+    # You can easily add extra buttons to forms.
+    form.add_button('Cancel', URL('default', 'index'))
 
     #after receiving data from a submitted form...
     if form.process().accepted:
@@ -87,13 +92,24 @@ def add():
 @auth.requires_login()
 def edit():
     #get page_id from URI
-    page_id = db.pagetable(request.args(0)) or direct(URL('default', 'index'))
+    page_id = db.pagetable(request.args(0)) or redirect(URL('default', 'index'))
+
+    #get the latest page/revision data
+    q = db(db.revision.pageid == page_id).select().last()
+    latest_body = q.body
+
+    q = db(db.pagetable.id == page_id).select()
+    latest_title = q[0].title
 
     #generate form for user to use
-    form = FORM('Body: ', INPUT(_name='input_body'), INPUT(_type='submit'))
+    form = SQLFORM.factory(
+        Field('input_title', 'string', label = 'Page Title', default = latest_title),
+        Field('input_body', 'text', label = 'Content', default = latest_body)
+        )
 
     #after receiving data from a submitted form...
     if form.process().accepted:
+        q[0].update_record(title = request.vars['input_title'])
         db.revision.insert(pageid = page_id, body = request.vars['input_body'])
         redirect(URL('default', 'view', args = page_id))
 

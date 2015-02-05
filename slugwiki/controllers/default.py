@@ -30,15 +30,11 @@ def index():
         return b
 
     def generate_edit_button(row):
-        b = ''
-        if auth.user_id == row.creator_id:
-            b = A('Edit', _class='btn', _href=URL('default', 'edit', args=[row.id]))
+        b = A('Edit', _class='btn', _href=URL('default', 'edit', args=[row.id]))
         return b
 
     def generate_del_button(row):
-        b = ''
-        if auth.user_id == row.creator_id:
-            b = A('Delete', _class='btn', _href=URL('default', 'delete', args=[row.id]))
+        b = A('Delete', _class='btn', _href=URL('default', 'delete', args=[row.id]))
         return b
 
     links = [
@@ -57,18 +53,37 @@ def view():
 
 @auth.requires_login()
 def add():
-    form = SQLFORM(db.pagetable)
+    """form = SQLFORM(db.pagetable)
     if form.process().accepted:
         session.flash = T('Page added')
-        redirect(URL('default', 'index'))
+        redirect(URL('default', 'index'))"""
+    form = FORM('Page title: ', INPUT(_name='input_title'), 'Body: ', INPUT(_name='input_body'), '', INPUT(_type='submit'))
+    if form.process().accepted:
+        #page_id = db.executesql('SELECT max(id) from pagetable')
+        """q = db((db.pagetable).select(db.pagetable.id.max()))
+        print 'the time is now'
+        print q
+        if q == '9':
+            print 'equal'
+        else:
+            print 'not equal'
+        for thing in q:
+            print thing.id"""
+        #insert new page with title
+        db.pagetable.insert(title = request.vars['input_title'])
+
+        #get id of page that was just inserted
+        q = db().select(db.pagetable.id)
+        page_id = q[len(q) - 1].id
+
+        #insert new revision tied to new page
+        db.revision.insert(pageid = page_id, body = request.vars['input_body'])
+        redirect(URL('default', 'view', args = page_id))
     return dict(form=form)
 
 @auth.requires_login()
 def edit():
     p = db.pagetable(request.args(0)) or direct(URL('default', 'index'))
-    if p.creator_id != auth.user_id:
-        session.flash = T('Not authorized')
-        redirect(URL('default', 'index'))
     form = SQLFORM(db.pagetable, record = p)
     if form.process().accepted:
         session.flash = T('Updated')
@@ -78,9 +93,6 @@ def edit():
 @auth.requires_login()
 def delete():
     p = db.pagetable(request.args(0)) or redirect(URL('default', 'index'))
-    if p.creator_id != auth.user_id:
-        session.flash = T('Not authorized')
-        redirect(URL('default', 'index'))
     db(db.pagetable.id == p.id).delete()
     redirect(URL('default', 'index'))
 

@@ -9,14 +9,13 @@ RE_LINKS = re.compile('(<<)(.*?)(>>)')
 db.define_table('pagetable', # Name 'page' is reserved unfortunately.
     # Complete!
     Field('title', 'string'),
-    Field('creator_id', db.auth_user),
     )
 
 
 db.define_table('revision',
     # Complete!
     Field('pageid', 'integer'),
-    Field('user_id', db.auth_user),
+    Field('userid', db.auth_user),
     Field('date_created', 'datetime'),
     Field('body', 'text'), # This is the main content of a revision.
     )
@@ -53,5 +52,9 @@ def represent_content(v, r):
 # We associate the wiki representation with the body of a revision.
 db.revision.body.represent = represent_content
 
-db.pagetable.creator_id.default = auth.user_id
-db.pagetable.creator_id.writable = False
+db.pagetable.title.required = True
+db.revision.userid.default = auth.user_id
+db.revision.userid.writable = False
+db.revision.userid.readable = False
+db.revision.date_created.default = datetime.utcnow()
+db.revision.date_created.writable = False

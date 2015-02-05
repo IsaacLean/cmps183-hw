@@ -5,13 +5,28 @@ import logging
 
 
 def index():
-    title = request.args(0) or 'all wiki pages'
-    display_title = title.title()
+    display_title = request.args(0) or 'All Wiki Pages'
+    form = ''
+    btnAdd = ''
+    page_body = ''
+    last_modified = ''
+    btnEdit = ''
     
     if request.args(0) != None:
-        #get the page content
-        form = ''
-        return dict(display_title=display_title, form = form)
+        #get the page id
+        q = db(db.pagetable.title == display_title).select().first()
+        
+        if(q == None):
+            #if q is None then that means the page doesn't exist
+            page_body = 'This page doesn\'t exist yet!'
+        else:
+            #otherwise the page exists and get the latest revision for the page id
+            page_id = q.id
+            q = db(db.revision.pageid == page_id).select().last()
+
+            last_modified = 'Last modified: ' + str(q.date_created)
+            btnEdit = A('Edit this page', _class='btn', _href=URL('default', 'edit', args = [page_id]))
+            page_body = q.body
     else:
         q = db.pagetable
 
@@ -34,8 +49,13 @@ def index():
         ]
 
         #display table of all pages in database with buttons
-        form = SQLFORM.grid(q, create = False, editable = False, deletable = False, details = False, links=links, csv = False)
-    return dict(display_title=display_title, form=form)
+        form = SQLFORM.grid(q, create = False, editable = False, deletable = False, details = False, csv = False, links=links)
+
+        #create add button
+        btnAdd = A('Add a new page', _class='btn', _href=URL('default', 'add'))
+
+    #return data to index.html
+    return dict(display_title=display_title, form=form, page_body=page_body, btnAdd=btnAdd, last_modified=last_modified, btnEdit=btnEdit)
 
 def view():
     #get page_id from URI
@@ -96,7 +116,7 @@ def edit():
 
     #generate form for user to use
     form = SQLFORM.factory(
-        Field('input_title', 'string', label = 'Page Title', default = latest_title, requires = [IS_NOT_EMPTY(), IS_NOT_IN_DB(db, db.pagetable.title)]),
+        Field('input_title', 'string', label = 'Page Title', default = latest_title, requires = IS_NOT_EMPTY()),
         Field('input_body', 'text', label = 'Content', default = latest_body)
         )
     form.add_button('Cancel', URL('default', 'view', args = [request.args(0)]))

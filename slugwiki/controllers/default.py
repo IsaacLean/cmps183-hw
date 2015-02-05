@@ -18,7 +18,6 @@ def index():
     # Let's uppernice the title.  The last 'title()' below
     # is actually a Python function, if you are wondering.
     display_title = title.title()
-
     
     # Here, I am faking it.  
     # Produce the content from real database data. 
@@ -47,6 +46,7 @@ def index():
     return dict(display_title=display_title, form=form)
 
 def view():
+    #get page_id from URI
     page_id = db.pagetable(request.args(0)) or redirect(URL('default', 'index'))
 
     #get page title
@@ -55,14 +55,20 @@ def view():
 
     #get latest revision data
     q = db(db.revision.pageid == page_id).select().last()
-    page_body = q.body
+    page_body = represent_wiki(q.body)
     page_date = q.date_created
 
-    return dict(page_title=page_title, page_body=page_body, page_date=page_date)
+    #create edit button
+    btnEdit = A('Edit this page', _class='btn', _href=URL('default', 'edit', args = [request.args(0)]))
+
+    return dict(page_title=page_title, page_body=page_body, page_date=page_date, btnEdit=btnEdit)
 
 @auth.requires_login()
 def add():
+    #generate form for user to use
     form = FORM('Page title: ', INPUT(_name='input_title'), 'Body: ', INPUT(_name='input_body'), '', INPUT(_type='submit'))
+
+    #after receiving data from a submitted form...
     if form.process().accepted:
         #insert new page with title
         db.pagetable.insert(title = request.vars['input_title'])
@@ -74,15 +80,24 @@ def add():
         #insert new revision tied to new page
         db.revision.insert(pageid = page_id, body = request.vars['input_body'])
         redirect(URL('default', 'view', args = page_id))
+
+    #return data to add.html
     return dict(form=form)
 
 @auth.requires_login()
 def edit():
-    p = db.pagetable(request.args(0)) or direct(URL('default', 'index'))
-    form = SQLFORM(db.pagetable, record = p)
+    #get page_id from URI
+    page_id = db.pagetable(request.args(0)) or direct(URL('default', 'index'))
+
+    #generate form for user to use
+    form = FORM('Body: ', INPUT(_name='input_body'), INPUT(_type='submit'))
+
+    #after receiving data from a submitted form...
     if form.process().accepted:
-        session.flash = T('Updated')
-        redirect(URL('default', 'view', args = [p.id]))
+        db.revision.insert(pageid = page_id, body = request.vars['input_body'])
+        redirect(URL('default', 'view', args = page_id))
+
+    #return data to edit.html
     return dict(form=form)
 
 @auth.requires_login()

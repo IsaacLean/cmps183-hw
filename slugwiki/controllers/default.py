@@ -70,7 +70,6 @@ def add():
         Field('input_title', 'string', label = 'Page Title'),
         Field('input_body', 'text', label = 'Content')
         )
-    # You can easily add extra buttons to forms.
     form.add_button('Cancel', URL('default', 'index'))
 
     #after receiving data from a submitted form...
@@ -106,6 +105,7 @@ def edit():
         Field('input_title', 'string', label = 'Page Title', default = latest_title),
         Field('input_body', 'text', label = 'Content', default = latest_body)
         )
+    form.add_button('Cancel', URL('default', 'view', args = [request.args(0)]))
 
     #after receiving data from a submitted form...
     if form.process().accepted:
@@ -114,7 +114,7 @@ def edit():
         redirect(URL('default', 'view', args = page_id))
 
     #return data to edit.html
-    return dict(form=form)
+    return dict(form=form, page_title=latest_title)
 
 @auth.requires_login()
 def delete():

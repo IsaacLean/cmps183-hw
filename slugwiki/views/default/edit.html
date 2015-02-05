@@ -1,7 +1,6 @@
 {{left_sidebar_enabled,right_sidebar_enabled=False,('message' in globals())}}
 {{extend 'layout.html'}}
 
-<h1>{{=display_title}}</h1>
+<h1>Edit "{{=page_title}}"</h1>
 
 {{=form}}
-{{=A('Add a new page', _class='btn', _href=URL('default', 'add'))}}

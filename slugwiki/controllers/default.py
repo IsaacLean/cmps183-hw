@@ -112,16 +112,21 @@ def edit():
     if form.process().accepted:
         q[0].update_record(title = request.vars['input_title'])
         db.revision.insert(pageid = page_id, body = request.vars['input_body'])
-        redirect(URL('default', 'view', args = page_id))
+        redirect(URL('default', 'view', args = page_id.id))
 
     #return data to edit.html
     return dict(form=form, page_title=latest_title)
 
 @auth.requires_login()
 def delete():
-    p = db.pagetable(request.args(0)) or redirect(URL('default', 'index'))
-    db(db.pagetable.id == p.id).delete()
-    redirect(URL('default', 'index'))
+    #get page_id from URI
+    page_id= db.pagetable(request.args(0)) or redirect(URL('default', 'index'))
+    
+    form = FORM.confirm('Are you sure you want to delete this page?')
+    if form.accepted:
+        db(db.pagetable.id == page_id.id).delete()
+        redirect(URL('default', 'index'))
+    return dict(form=form)
 
 
 def test():

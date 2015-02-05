@@ -5,44 +5,36 @@ import logging
 
 
 def index():
-    """
-    This is the main page of the wiki.  
-    You will find the title of the requested page in request.args(0).
-    If this is None, then just serve the latest revision of something titled "Main page" or something 
-    like that. 
-    """
-    title = request.args(0) or 'main page'
-    # You have to serve to the user the most recent revision of the 
-    # page with title equal to title.
-    
-    # Let's uppernice the title.  The last 'title()' below
-    # is actually a Python function, if you are wondering.
+    title = request.args(0) or 'all wiki pages'
     display_title = title.title()
     
-    # Here, I am faking it.  
-    # Produce the content from real database data. 
-    #content = represent_wiki("I like <<Panda>>s")
-    q = db.pagetable
+    if request.args(0) != None:
+        #get the page content
+        form = ''
+        return dict(display_title=display_title, form = form)
+    else:
+        q = db.pagetable
 
-    def generate_view_button(row):
-        b = A('View', _class='btn', _href=URL('default', 'view', args=[row.id]))
-        return b
+        def generate_view_button(row):
+            b = A('View', _class='btn', _href=URL('default', 'view', args=[row.id]))
+            return b
 
-    def generate_edit_button(row):
-        b = A('Edit', _class='btn', _href=URL('default', 'edit', args=[row.id]))
-        return b
+        def generate_edit_button(row):
+            b = A('Edit', _class='btn', _href=URL('default', 'edit', args=[row.id]))
+            return b
 
-    def generate_del_button(row):
-        b = A('Delete', _class='btn', _href=URL('default', 'delete', args=[row.id]))
-        return b
+        def generate_del_button(row):
+            b = A('Delete', _class='btn', _href=URL('default', 'delete', args=[row.id]))
+            return b
 
-    links = [
-        dict(header = '', body = generate_view_button),
-        dict(header = '', body = generate_edit_button),
-        dict(header = '', body = generate_del_button)
-    ]
+        links = [
+            dict(header = '', body = generate_view_button),
+            dict(header = '', body = generate_edit_button),
+            dict(header = '', body = generate_del_button)
+        ]
 
-    form = SQLFORM.grid(q, create = False, editable = False, deletable = False, details = False, links=links, csv = False)
+        #display table of all pages in database with buttons
+        form = SQLFORM.grid(q, create = False, editable = False, deletable = False, details = False, links=links, csv = False)
     return dict(display_title=display_title, form=form)
 
 def view():
@@ -68,7 +60,7 @@ def view():
 def add():
     #generate form for user to use
     form = SQLFORM.factory(
-        Field('input_title', 'string', label = 'Page Title', requires = IS_NOT_EMPTY()),
+        Field('input_title', 'string', label = 'Page Title', requires = [IS_NOT_EMPTY(), IS_NOT_IN_DB(db, db.pagetable.title)]),
         Field('input_body', 'text', label = 'Content')
         )
     form.add_button('Cancel', URL('default', 'index'))
@@ -104,7 +96,7 @@ def edit():
 
     #generate form for user to use
     form = SQLFORM.factory(
-        Field('input_title', 'string', label = 'Page Title', default = latest_title, requires = IS_NOT_EMPTY()),
+        Field('input_title', 'string', label = 'Page Title', default = latest_title, requires = [IS_NOT_EMPTY(), IS_NOT_IN_DB(db, db.pagetable.title)]),
         Field('input_body', 'text', label = 'Content', default = latest_body)
         )
     form.add_button('Cancel', URL('default', 'view', args = [request.args(0)]))

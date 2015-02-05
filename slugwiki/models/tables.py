@@ -8,7 +8,7 @@ RE_LINKS = re.compile('(<<)(.*?)(>>)')
 
 db.define_table('pagetable', # Name 'page' is reserved unfortunately.
     # Complete!
-    Field('title', 'string'),
+    Field('title', 'string', unique = True),
     )
 
 
@@ -53,6 +53,8 @@ def represent_content(v, r):
 db.revision.body.represent = represent_content
 
 db.pagetable.title.required = True
+db.pagetable.title.requires = IS_NOT_EMPTY()
+db.pagetable.title.requires = IS_NOT_IN_DB(db, db.pagetable.title)
 db.revision.userid.default = auth.user_id
 db.revision.userid.writable = False
 db.revision.userid.readable = False

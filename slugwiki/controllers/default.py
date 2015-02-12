@@ -21,6 +21,7 @@ def index():
         if(q == None):
             #if q is None then that means the page doesn't exist
             page_body = 'This page doesn\'t exist yet!'
+            btnAdd = A('Add a new page', _class='btn', _href=URL('default', 'add'));
         else:
             #otherwise the page exists and get the latest revision for the page id
             page_id = q.id

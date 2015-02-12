@@ -147,7 +147,9 @@ def history():
         dict(header = '', body = generate_revert_button)
     ]
 
-    form = SQLFORM.grid(db.revision.pageid == page_id, create = False, editable = False, deletable = False, details = False, csv = False, sortable=False, user_signature=False, links=links)
+    fields = [db.revision.userid, db.revision.date_created, db.revision.body, db.revision.rev_comment]
+
+    form = SQLFORM.grid(db.revision.pageid == page_id, fields=fields, create = False, editable = False, deletable = False, details = False, csv = False, sortable=False, orderby="revision.date_created DESC", user_signature=False, links=links)
     
     btnBack = A('Return to page', _class='btn', _href=URL('default', 'index', args = [page_title]))
 

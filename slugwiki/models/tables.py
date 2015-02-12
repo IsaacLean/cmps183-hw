@@ -18,6 +18,7 @@ db.define_table('revision',
     Field('userid', db.auth_user),
     Field('date_created', 'datetime'),
     Field('body', 'text'), # This is the main content of a revision.
+    Field('rev_comment', 'text')
     )
 
 db.define_table('testpage',

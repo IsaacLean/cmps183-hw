@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 # this file is released under public domain and you can use without limitations
 
-import logging
-
-
 def index():
     title = request.args(0) or 'All Wiki Pages'
     display_title = title.replace('_', ' ')
@@ -27,6 +24,7 @@ def index():
 
             last_modified = 'Last modified: ' + str(q.date_created)
             btnEdit = A('Edit this page', _class='btn', _href=URL('default', 'edit', args = [page_id]))
+            #btnEdit = A('Edit this page', _class='btn', _href=URL('default', 'index', args=[display_title], vars = dict(edit='true')))
             page_body = represent_wiki(q.body)
     else:
         q = db.pagetable
@@ -36,7 +34,7 @@ def index():
             return b
 
         def generate_edit_button(row):
-            b = A('Edit', _class='btn', _href=URL('default', 'edit', args=[row.id]))
+            b = A('Edit', _class='btn', _href=URL('default', 'edit', args=[row.title]))
             return b
 
         def generate_del_button(row):
@@ -105,17 +103,21 @@ def add():
 
 @auth.requires_login()
 def edit():
-    #get page_id from URI
-    page_id = db.pagetable(request.args(0)) or redirect(URL('default', 'index'))
+    q = db(db.pagetable.title == request.args(0)).select().last()
+    page_query = q
+    latest_title = ""
+    page_id = -1
+
+    if(q):
+        latest_title = q.title
+        page_id = q.id
+    else:
+        redirect(URL('default', 'index'))
 
     #get the latest page/revision data
     q = db(db.revision.pageid == page_id).select().last()
     latest_body = q.body
 
-    q = db(db.pagetable.id == page_id).select()
-    latest_title = q[0].title
-
-    #generate form for user to use
     form = SQLFORM.factory(
         Field('input_title', 'string', label = 'Page Title', default = latest_title, requires = IS_NOT_EMPTY()),
         Field('input_body', 'text', label = 'Content', default = latest_body)
@@ -124,7 +126,7 @@ def edit():
 
     #after receiving data from a submitted form...
     if form.process().accepted:
-        q[0].update_record(title = request.vars['input_title'])
+        page_query.update_record(title = request.vars['input_title'])
         db.revision.insert(pageid = page_id, body = request.vars['input_body'])
         session.flash = T('Page edited')
         redirect(URL('default', 'index', args = request.vars['input_title']))

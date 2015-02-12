@@ -25,7 +25,7 @@ def index():
 
             last_modified = 'Last modified: ' + str(q.date_created)
             btnEdit = A('Edit this page', _class='btn', _href=URL('default', 'edit', args = [display_title]))
-            btnHistory = A('History', _class='btn', _href=URL('default', 'history', args = [display_title], user_signature=True))
+            btnHistory = A('History', _class='btn', _href=URL('default', 'history', args = [display_title]))
             page_body = represent_wiki(q.body)
     else:
         q = db.pagetable
@@ -71,8 +71,8 @@ def history():
         redirect(URL('default', 'index'))
 
     q = (db.revision.pageid == page_id)
-    form = SQLFORM.grid(q, create = False, editable = False, deletable = False, details = False, csv = False)
-
+    form = SQLFORM.grid(q, create = False, editable = False, deletable = False, details = False, csv = False, user_signature=False)
+    
     btnBack = A('Return to page', _class='btn', _href=URL('default', 'index', args = [page_title]))
 
     return dict(form=form, page_title=page_title, btnBack=btnBack)

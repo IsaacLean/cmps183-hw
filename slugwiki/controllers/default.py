@@ -9,6 +9,7 @@ def index():
     page_body = ''
     last_modified = ''
     btnEdit = ''
+    btnHistory = ''
     
     if request.args(0) != None:
         #get the page id
@@ -23,8 +24,8 @@ def index():
             q = db(db.revision.pageid == page_id).select().last()
 
             last_modified = 'Last modified: ' + str(q.date_created)
-            btnEdit = A('Edit this page', _class='btn', _href=URL('default', 'edit', args = [page_id]))
-            #btnEdit = A('Edit this page', _class='btn', _href=URL('default', 'index', args=[display_title], vars = dict(edit='true')))
+            btnEdit = A('Edit this page', _class='btn', _href=URL('default', 'edit', args = [display_title]))
+            btnHistory = A('History', _class='btn', _href=URL('default', 'history', args = [display_title], user_signature=True))
             page_body = represent_wiki(q.body)
     else:
         q = db.pagetable
@@ -54,26 +55,25 @@ def index():
         btnAdd = A('Add a new page', _class='btn', _href=URL('default', 'add'))
 
     #return data to index.html
-    return dict(display_title=display_title, form=form, page_body=page_body, btnAdd=btnAdd, last_modified=last_modified, btnEdit=btnEdit)
+    return dict(display_title=display_title, form=form, page_body=page_body, btnAdd=btnAdd, last_modified=last_modified, btnEdit=btnEdit, btnHistory=btnHistory)
 
-def view():
-    #get page_id from URI
-    page_id = db.pagetable(request.args(0)) or redirect(URL('default', 'index'))
+@auth.requires_login()
+def history():
+    q = db(db.pagetable.title == request.args(0)).select().last()
+    page_query = q
+    latest_title = ""
+    page_id = -1
 
-    #get page title
-    q = db(db.pagetable.id == page_id).select()
-    page_title = q[0].title
+    if(q):
+        latest_title = q.title
+        page_id = q.id
+    else:
+        redirect(URL('default', 'index'))
 
-    #get latest revision data
-    q = db(db.revision.pageid == page_id).select().last()
-    page_body = represent_wiki(q.body)
-    page_date = q.date_created
+    q = (db.revision.pageid == page_id)
+    form = SQLFORM.grid(q, create = False, editable = False, deletable = False, details = False, csv = False)
 
-    #create edit button
-    btnEdit = A('Edit this page', _class='btn', _href=URL('default', 'edit', args = [request.args(0)]))
-
-    #return data to view.html
-    return dict(page_title=page_title, page_body=page_body, page_date=page_date, btnEdit=btnEdit)
+    return dict(form=form, page_title=latest_title)
 
 @auth.requires_login()
 def add():
@@ -122,7 +122,7 @@ def edit():
         Field('input_title', 'string', label = 'Page Title', default = latest_title, requires = IS_NOT_EMPTY()),
         Field('input_body', 'text', label = 'Content', default = latest_body)
         )
-    form.add_button('Cancel', URL('default', 'view', args = [request.args(0)]))
+    form.add_button('Cancel', URL('default', 'index', args = [latest_title]))
 
     #after receiving data from a submitted form...
     if form.process().accepted:

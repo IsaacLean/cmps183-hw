@@ -159,19 +159,20 @@ def revert():
     q = db(db.pagetable.title == page_title).select().last()
     latest_title = ""
     page_id = -1
+    rev_id = request.args(1)
 
     if(q):
         page_id = q.id
-        q = db(db.revision.id == request.args(1)).select().last()
+        q = db(db.revision.id == rev_id).select().last()
         if(q):
-            db.revision.insert(pageid = page_id, body = q.body, rev_comment = q.rev_comment)
+            comment = "Revert to revision " + rev_id + " created on " + str(q.date_created)
+            db.revision.insert(pageid = page_id, body = q.body, rev_comment = comment)
             session.flash = T('Page reverted')
             redirect(URL('default', 'index', args = [page_title]))
         else:
             redirect(URL('default', 'index'))
     else:
         redirect(URL('default', 'index'))
-
 
 @auth.requires_login()
 def delete():

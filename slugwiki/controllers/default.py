@@ -41,6 +41,10 @@ def index():
             b = A('Edit', _class='btn', _href=URL('default', 'edit', args=[row.title]))
             return b
 
+        def generate_history_button(row):
+            b = A('History', _class='btn', _href=URL('default', 'history', args=[row.title]))
+            return b
+
         def generate_del_button(row):
             b = A('Delete', _class='btn', _href=URL('default', 'delete', args=[row.id]))
             return b
@@ -48,6 +52,7 @@ def index():
         links = [
             dict(header = '', body = generate_view_button),
             dict(header = '', body = generate_edit_button),
+            dict(header = '', body = generate_history_button),
             dict(header = '', body = generate_del_button)
         ]
 
@@ -134,12 +139,39 @@ def history():
     else:
         redirect(URL('default', 'index'))
 
-    q = (db.revision.pageid == page_id)
-    form = SQLFORM.grid(q, create = False, editable = False, deletable = False, details = False, csv = False, user_signature=False)
+    def generate_revert_button(row):
+        b = A('Revert', _class='btn', _href=URL('default', 'revert', args=[page_title, row.id]))
+        return b
+
+    links = [
+        dict(header = '', body = generate_revert_button)
+    ]
+
+    form = SQLFORM.grid(db.revision.pageid == page_id, create = False, editable = False, deletable = False, details = False, csv = False, sortable=False, user_signature=False, links=links)
     
     btnBack = A('Return to page', _class='btn', _href=URL('default', 'index', args = [page_title]))
 
     return dict(form=form, page_title=page_title, btnBack=btnBack)
+
+@auth.requires_login()
+def revert():
+    page_title = request.args(0).replace('_', ' ')
+    q = db(db.pagetable.title == page_title).select().last()
+    latest_title = ""
+    page_id = -1
+
+    if(q):
+        page_id = q.id
+        q = db(db.revision.id == request.args(1)).select().last()
+        if(q):
+            db.revision.insert(pageid = page_id, body = q.body, rev_comment = q.rev_comment)
+            session.flash = T('Page reverted')
+            redirect(URL('default', 'index', args = [page_title]))
+        else:
+            redirect(URL('default', 'index'))
+    else:
+        redirect(URL('default', 'index'))
+
 
 @auth.requires_login()
 def delete():

@@ -59,13 +59,13 @@ def index():
 
 @auth.requires_login()
 def history():
-    q = db(db.pagetable.title == request.args(0)).select().last()
+    page_title = request.args(0).replace('_', ' ')
+    q = db(db.pagetable.title == page_title).select().last()
     page_query = q
     latest_title = ""
     page_id = -1
 
     if(q):
-        latest_title = q.title
         page_id = q.id
     else:
         redirect(URL('default', 'index'))
@@ -73,7 +73,9 @@ def history():
     q = (db.revision.pageid == page_id)
     form = SQLFORM.grid(q, create = False, editable = False, deletable = False, details = False, csv = False)
 
-    return dict(form=form, page_title=latest_title)
+    btnBack = A('Return to page', _class='btn', _href=URL('default', 'index', args = [page_title]))
+
+    return dict(form=form, page_title=page_title, btnBack=btnBack)
 
 @auth.requires_login()
 def add():
@@ -103,7 +105,8 @@ def add():
 
 @auth.requires_login()
 def edit():
-    q = db(db.pagetable.title == request.args(0)).select().last()
+    query_title = request.args(0).replace('_', ' ')
+    q = db(db.pagetable.title == query_title).select().last()
     page_query = q
     latest_title = ""
     page_id = -1
@@ -144,6 +147,7 @@ def delete():
         db(db.pagetable.id == page_id.id).delete()
         session.flash = T('Page deleted')
         redirect(URL('default', 'index'))
+
     return dict(form=form)
 
 

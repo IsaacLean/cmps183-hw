@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 # this file is released under public domain and you can use without limitations
 
+import logging
+
+
 def index():
     title = request.args(0) or 'All Wiki Pages'
     display_title = title.replace('_', ' ')
@@ -58,26 +61,6 @@ def index():
     return dict(display_title=display_title, form=form, page_body=page_body, btnAdd=btnAdd, last_modified=last_modified, btnEdit=btnEdit, btnHistory=btnHistory)
 
 @auth.requires_login()
-def history():
-    page_title = request.args(0).replace('_', ' ')
-    q = db(db.pagetable.title == page_title).select().last()
-    page_query = q
-    latest_title = ""
-    page_id = -1
-
-    if(q):
-        page_id = q.id
-    else:
-        redirect(URL('default', 'index'))
-
-    q = (db.revision.pageid == page_id)
-    form = SQLFORM.grid(q, create = False, editable = False, deletable = False, details = False, csv = False, user_signature=False)
-    
-    btnBack = A('Return to page', _class='btn', _href=URL('default', 'index', args = [page_title]))
-
-    return dict(form=form, page_title=page_title, btnBack=btnBack)
-
-@auth.requires_login()
 def add():
     #generate form for user to use
     form = SQLFORM.factory(
@@ -123,19 +106,40 @@ def edit():
 
     form = SQLFORM.factory(
         Field('input_title', 'string', label = 'Page Title', default = latest_title, requires = IS_NOT_EMPTY()),
-        Field('input_body', 'text', label = 'Content', default = latest_body)
+        Field('input_body', 'text', label = 'Content', default = latest_body),
+        Field('input_comment', 'string', label = 'Revision comment')
         )
     form.add_button('Cancel', URL('default', 'index', args = [latest_title]))
 
     #after receiving data from a submitted form...
     if form.process().accepted:
         page_query.update_record(title = request.vars['input_title'])
-        db.revision.insert(pageid = page_id, body = request.vars['input_body'])
+        db.revision.insert(pageid = page_id, body = request.vars['input_body'], rev_comment = request.vars['input_comment'])
         session.flash = T('Page edited')
         redirect(URL('default', 'index', args = request.vars['input_title']))
 
     #return data to edit.html
     return dict(form=form, page_title=latest_title)
+
+@auth.requires_login()
+def history():
+    page_title = request.args(0).replace('_', ' ')
+    q = db(db.pagetable.title == page_title).select().last()
+    page_query = q
+    latest_title = ""
+    page_id = -1
+
+    if(q):
+        page_id = q.id
+    else:
+        redirect(URL('default', 'index'))
+
+    q = (db.revision.pageid == page_id)
+    form = SQLFORM.grid(q, create = False, editable = False, deletable = False, details = False, csv = False, user_signature=False)
+    
+    btnBack = A('Return to page', _class='btn', _href=URL('default', 'index', args = [page_title]))
+
+    return dict(form=form, page_title=page_title, btnBack=btnBack)
 
 @auth.requires_login()
 def delete():
